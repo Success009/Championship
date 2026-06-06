@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-pixel: "Press Start 2P", cursive;
+}
+
+body {
+  margin: 0;
+  background-color: #121212;
+  /* Premium Minecraft dirt grid tiled aesthetic using pure CSS */
+  background-image: 
+    linear-gradient(rgba(18, 18, 18, 0.94) 100%, transparent 100%),
+    repeating-conic-gradient(#181818 0% 25%, #1a1a1a 0% 50%) ;
+  background-size: auto, 32px 32px;
+  background-blend-mode: multiply;
+  color: #f1f5f9;
+  font-family: "JetBrains Mono", monospace;
+  overflow-x: hidden;
+}
+
+.smooth-image {
+  image-rendering: auto !important;
+  image-rendering: -webkit-optimize-contrast !important;
+}
+
+.pixelated-image {
+  image-rendering: pixelated !important;
+}
+
+/* Authentic Minecraft Sleek Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #555555;
+  border: 2px solid #000000;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aa0000;
+}
+
+/* --- THE REAL MINECRAFT BUTTONS (Saves tons of customized styling) --- */
+.mc-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #5a5a5a;
+  border: 2px solid #000000;
+  box-shadow: inset -2px -2px 0px #222222, inset 2px 2px 0px #9e9e9e;
+  color: #e0e0e0;
+  text-shadow: 2px 2px 0px #1c1c1c;
+  padding: 8px 16px;
+  font-family: "Press Start 2P", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  transition: none; /* MC style must flip instantly, no slow transition! */
+  text-align: center;
+}
+
+.mc-button:hover:not(:disabled) {
+  background-color: #4c8a2b; /* Pure MC Green */
+  box-shadow: inset -2px -2px 0px #1e3d0f, inset 2px 2px 0px #79b752;
+  color: #ffff55; /* Gold text */
+  text-shadow: 2px 2px 0px #0b1a03;
+}
+
+.mc-button:active:not(:disabled) {
+  box-shadow: inset 2px 2px 0px #000000, inset -2px -2px 0px #5a5a5a;
+  background-color: #2c5518;
+  color: #ffff55;
+}
+
+.mc-button:disabled {
+  background-color: #313131;
+  box-shadow: inset -2px -2px 0px #151515, inset 2px 2px 0px #535353;
+  color: #707070;
+  text-shadow: 2px 2px 0px #0e0e0e;
+  cursor: not-allowed;
+}
+
+/* ACTIVE Selected toggle category button */
+.mc-button-active {
+  background-color: #4c8a2b; /* Green */
+  border: 2px solid #000000;
+  box-shadow: inset -2px -2px 0px #1e3d0f, inset 2px 2px 0px #79b752;
+  color: #ffff55; /* Gold text */
+  text-shadow: 2px 2px 0px #0b1a03;
+}
+
+/* MINECRAFT CONTAINER SHIELED SCREEN PANEL */
+.mc-panel {
+  background-color: #2a2a2a; /* Custom grey container */
+  border: 4px solid #000000;
+  box-shadow: inset -4px -4px 0px #151515, inset 4px 4px 0px #555555;
+  image-rendering: pixelated;
+  padding: 16px;
+}
+
+/* DEEP INSET SLOT/CONTAINER ITEM MESH GRID */
+.mc-slot {
+  background-color: #0c0c0c;
+  border: 2px solid #000000;
+  box-shadow: inset 2px 2px 0px #050505, inset -2px -2px 0px #313131;
+}
+
+/* TEXT SHADOWS */
+.mc-shadow-text {
+  text-shadow: 2px 2px 0px #000000;
+}
+
+.mc-shadow-text-gold {
+  color: #ffaa00;
+  text-shadow: 2px 2px 0px #3f2a00;
+}
+
+.mc-shadow-text-aqua {
+  color: #55ffff;
+  text-shadow: 2px 2px 0px #003f3f;
+}
+
+.mc-shadow-text-green {
+  color: #55ff55;
+  text-shadow: 2px 2px 0px #003f00;
+}
+
+.mc-shadow-text-red {
+  color: #ff5555;
+  text-shadow: 2px 2px 0px #3f0000;
+}
+
+/* Row Highlights */
+.mc-row-glow:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}

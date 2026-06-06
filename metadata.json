@@ -1,0 +1,6 @@
+{
+  "name": "NML x Infinity NP Leaderboard",
+  "description": "Official live public dashboard for the NML x Infinity NP (Nepali Championship Season 1) Minecraft Tournament, featuring real-time scores, standings, and game metrics.",
+  "requestFramePermissions": [ ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
