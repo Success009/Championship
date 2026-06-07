@@ -8,7 +8,6 @@ export enum GameKey {
   Bedwars = "bedwars",
   PvP = "pvp",
   Parkour = "parkour",
-  Skywars = "skywars",
   BoatRace = "boat_race",
 }
 
@@ -17,7 +16,6 @@ export interface GameScores {
   [GameKey.Bedwars]: number;
   [GameKey.PvP]: number;
   [GameKey.Parkour]: number;
-  [GameKey.Skywars]: number;
   [GameKey.BoatRace]: number;
 }
 

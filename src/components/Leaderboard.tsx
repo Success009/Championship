@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { Search } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Search, ChevronLeft, ChevronRight, Trophy, Sparkles, Star } from "lucide-react";
 import { Team, Player, GameKey } from "../types";
 
 interface LeaderboardProps {
@@ -14,14 +15,14 @@ export default function Leaderboard({ teams, players }: LeaderboardProps) {
   const pageSize = 12;
 
   // Exact literal game mode categories as requested by user
-  const GAME_TAGS: Record<GameKey, string> = {
-    [GameKey.BattleRoyal]: "BATTLE ROYAL",
-    [GameKey.Bedwars]: "BEDWARS",
-    [GameKey.PvP]: "PVP",
-    [GameKey.Parkour]: "PARKOUR",
-    [GameKey.Skywars]: "SKYWARS",
-    [GameKey.BoatRace]: "ICE BOAT RACING",
-  };
+  const CATEGORY_TABS = [
+    { key: "all" as const, label: "OVERALL" },
+    { key: GameKey.Parkour, label: "PARKOUR" },
+    { key: GameKey.BoatRace, label: "BOAT RACE" },
+    { key: GameKey.Bedwars, label: "BEDWARS" },
+    { key: GameKey.PvP, label: "PVP" },
+    { key: GameKey.BattleRoyal, label: "BATTLE ROYALE" },
+  ];
 
   // Compute live scores based on category selection
   const rawLeaderboard = useMemo(() => {
@@ -75,273 +76,280 @@ export default function Leaderboard({ teams, players }: LeaderboardProps) {
 
   const totalPages = Math.ceil(filteredList.length / pageSize) || 1;
 
-  // Custom rank background styling presets
+  // Premium MCTiers-inspired theme mappings
   const getRankTheme = (rank: number) => {
-    if (rank === 1) return "bg-[#ffff55] text-black border-[#b08100]";
-    if (rank === 2) return "bg-[#55ffff] text-black border-[#009fb7]";
-    if (rank === 3) return "bg-[#ff5555] text-white border-[#aa0000]";
-    return "bg-[#313131] text-zinc-400 border-zinc-650";
+    if (rank === 1) {
+      return {
+        badge: "bg-amber-500 text-slate-100 font-black shadow-md",
+        p1Name: "text-blue-400 font-extrabold hover:text-blue-300 transition-colors",
+        p2Name: "text-rose-400 font-extrabold hover:text-rose-300 transition-colors",
+        p1Pts: "text-blue-400/80 font-bold font-mono",
+        p2Pts: "text-rose-400/80 font-bold font-mono",
+        rowBorder: "mct-row podium-accent-1",
+        combinedBg: "bg-amber-500/10 border border-amber-500/20 text-amber-400",
+        decor: <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+      };
+    }
+    if (rank === 2) {
+      return {
+        badge: "bg-sky-400 text-slate-100 font-black shadow-md",
+        p1Name: "text-blue-400 font-extrabold hover:text-blue-300 transition-colors",
+        p2Name: "text-rose-400 font-extrabold hover:text-rose-300 transition-colors",
+        p1Pts: "text-blue-400/80 font-semibold font-mono",
+        p2Pts: "text-rose-400/80 font-semibold font-mono",
+        rowBorder: "mct-row podium-accent-2",
+        combinedBg: "bg-sky-500/10 border border-sky-500/20 text-sky-400",
+        decor: <Sparkles className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+      };
+    }
+    if (rank === 3) {
+      return {
+        badge: "bg-rose-400 text-slate-100 font-black shadow-md",
+        p1Name: "text-blue-400 font-bold hover:text-blue-300 transition-colors",
+        p2Name: "text-rose-400 font-bold hover:text-rose-300 transition-colors",
+        p1Pts: "text-blue-400/80 font-semibold font-mono",
+        p2Pts: "text-rose-400/80 font-semibold font-mono",
+        rowBorder: "mct-row podium-accent-3",
+        combinedBg: "bg-rose-500/10 border border-rose-500/20 text-rose-400",
+        decor: <Star className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+      };
+    }
+    return {
+      badge: "bg-slate-800 text-slate-200 font-semibold",
+      p1Name: "text-slate-300 font-medium hover:text-blue-400 transition-colors",
+      p2Name: "text-slate-300 font-medium hover:text-rose-400 transition-colors",
+      p1Pts: "text-slate-400 font-semibold font-mono transition-colors",
+      p2Pts: "text-slate-400 font-semibold font-mono transition-colors",
+      rowBorder: "mct-row",
+      combinedBg: "bg-slate-900 border border-slate-800 text-slate-300",
+      decor: null
+    };
   };
 
   return (
     <div className="w-full space-y-6">
       
-      {/* 1. Category Switcher Hub - Grid styling matching Minecraft menus */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
-        <button
-          onClick={() => {
-            setActiveCategory("all");
-            setCurrentPage(1);
-          }}
-          className={`mc-button py-2.5 text-[10px] break-keep ${activeCategory === "all" ? "mc-button-active" : ""}`}
-        >
-          Overall
-        </button>
-
-        {Object.entries(GAME_TAGS).map(([key, label]) => {
-          const gameKey = key as GameKey;
-          const isSelected = activeCategory === gameKey;
-          return (
-            <button
-              key={gameKey}
-              onClick={() => {
-                setActiveCategory(gameKey);
-                setCurrentPage(1);
-              }}
-              className={`mc-button py-2.5 text-[10px] whitespace-nowrap ${isSelected ? "mc-button-active" : ""}`}
-            >
-              {label}
-            </button>
-          );
-        })}
+      {/* 1. Category Switcher Hub - Responsive and slidey tabs */}
+      <div className="bg-[#121622] p-1.5 rounded-2xl border border-[#1f2537]">
+        <div className="flex flex-wrap gap-1.5 w-full">
+          {CATEGORY_TABS.map((tab) => {
+            const isSelected = activeCategory === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setActiveCategory(tab.key);
+                  setCurrentPage(1);
+                }}
+                className={`cursor-pointer px-4 py-2.5 rounded-xl text-xs font-bold tracking-wider uppercase transition-all duration-200 relative overflow-hidden ${
+                  isSelected ? "text-slate-950 font-extrabold" : "text-zinc-400 hover:text-white"
+                }`}
+              >
+                {isSelected && (
+                  <motion.div
+                    layoutId="activeCategoryBg"
+                    className="absolute inset-0 bg-[#f8fafc] rounded-xl"
+                    transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                  />
+                )}
+                <span className="relative z-10">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* 2. Responsive Toolbar Slot */}
-      <div className="mc-panel bg-[#1f1f1f] border-[#0c0c0c] py-4 px-5 flex flex-row items-center justify-center">
-        
-        {/* Dynamic Search centered for balanced negative space */}
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+      {/* 2. Sleek Minimal Search Input */}
+      <div className="bg-[#121622] rounded-2xl p-4 border border-[#1f2537] flex items-center">
+        <div className="relative w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           <input
             type="text"
-            placeholder="Search players..."
+            placeholder="Search team or players..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full bg-[#0a0a0a] border-2 border-black text-white text-xs font-mono rounded px-4 py-2.5 pl-10 placeholder-zinc-600 outline-none focus:border-zinc-500 text-center"
+            className="w-full bg-[#0b0d14] border border-[#1f2537] text-white text-xs font-medium rounded-xl px-4 py-3 pl-11 placeholder-zinc-500 outline-none focus:border-slate-700 transition-all"
           />
         </div>
-
       </div>
 
-      {/* 3. Leaderboard Table / Grid Container with distinct Native Mobile layout */}
-      <div className="mc-panel bg-[#181818] border-black p-0 overflow-hidden">
+      {/* 3. Symmetrical Table with animations */}
+      <div className="space-y-3">
         
-        {/* Desktop-First Symmetrical Table: Hidden on smaller viewports */}
-        <div className="hidden sm:block overflow-x-auto select-none">
-          <div className="min-w-[760px] w-full divide-y-2 divide-black">
-            
-            {/* Exactly structured matching header columns layout */}
-            <div className="grid grid-cols-12 px-6 py-3.5 bg-[#101010] font-pixel text-[8px] tracking-wider text-[#ffaa00] mc-shadow-text-gold border-b-4 border-black">
-              <div className="col-span-1 text-center">RANK</div>
-              <div className="col-span-3 text-left">NAME</div>
-              <div className="col-span-2 text-right pr-4">POINT</div>
-              <div className="col-span-2 text-center text-[#55ffff]">TOTAL POINTS</div>
-              <div className="col-span-2 text-left pl-4">POINTS</div>
-              <div className="col-span-2 text-right">NAME</div>
-            </div>
+        {/* Deskop Table Header (hidden on mobile) */}
+        <div className="hidden sm:grid grid-cols-12 px-6 py-3.5 bg-[#121622]/40 border border-[#1f2537]/60 rounded-xl font-bold text-xs uppercase tracking-widest text-[#94a3b8]">
+          <div className="col-span-1 text-center font-mono">Rank</div>
+          <div className="col-span-3 text-left">Player A</div>
+          <div className="col-span-2 text-right pr-4 text-zinc-500">Points</div>
+          <div className="col-span-2 text-center text-slate-100 font-extrabold">TOTAL</div>
+          <div className="col-span-2 text-left pl-4 text-zinc-500">Points</div>
+          <div className="col-span-2 text-right">Player B</div>
+        </div>
 
-            {/* Live Rows */}
+        {/* List of performers */}
+        <div className="w-full space-y-2 select-none min-h-[400px]">
+          <AnimatePresence mode="popLayout animate">
             {filteredList.length === 0 ? (
-              <div className="py-12 text-center font-pixel text-[8px] text-zinc-650 mc-shadow-text">
-                NO DUOS DETECTED ON SYSTEM REGISTRATION
-              </div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="py-16 text-center text-xs text-zinc-500 font-mono tracking-widest uppercase bg-[#121622] border border-[#1f2537] rounded-2xl"
+              >
+                No matching teams or players found on system registry
+              </motion.div>
             ) : (
               paginatedList.map((item, index) => {
                 const currentRank = (currentPage - 1) * pageSize + index + 1;
-                const rankTheme = getRankTheme(currentRank);
-                
-                // Highlight classes for Top 3 performers
-                let p1NameStyle = "text-zinc-200 font-bold font-mono";
-                let p2NameStyle = "text-zinc-200 font-bold font-mono text-right";
-
-                if (currentRank === 1) {
-                  p1NameStyle = "text-[#ffff55] font-black mc-shadow-text";
-                  p2NameStyle = "text-[#ffff55] font-black mc-shadow-text text-right";
-                } else if (currentRank === 2) {
-                  p1NameStyle = "text-[#55ffff] font-black mc-shadow-text";
-                  p2NameStyle = "text-[#55ffff] font-black mc-shadow-text text-right";
-                } else if (currentRank === 3) {
-                  p1NameStyle = "text-[#ff5555] font-black mc-shadow-text";
-                  p2NameStyle = "text-[#ff5555] font-black mc-shadow-text text-right";
-                }
+                const { badge, p1Name, p2Name, p1Pts, p2Pts, rowBorder, combinedBg, decor } = getRankTheme(currentRank);
 
                 return (
-                  <div 
+                  <motion.div
+                    layout
                     key={item.id}
-                    className="grid grid-cols-12 items-center px-6 py-3 hover:bg-white/5 transition-all text-xs"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ 
+                      type: "spring", 
+                      stiffness: 420, 
+                      damping: 32,
+                      opacity: { duration: 0.2 } 
+                    }}
+                    className={`rounded-2xl p-4 sm:p-0 ${rowBorder}`}
                   >
-                    {/* Rank Badge Slot */}
-                    <div className="col-span-1 flex items-center justify-center">
-                      <span className={`w-7 h-7 border-2 rounded flex items-center justify-center font-pixel text-[8px] ${rankTheme}`}>
-                        {currentRank}
-                      </span>
-                    </div>
-
-                    {/* Left Player Username (P1) */}
-                    <div className="col-span-3 text-left">
-                      <span className={`${p1NameStyle} tracking-wide text-xs truncate flex items-center gap-1.5`}>
-                        <span className="w-2 h-2 rounded bg-[#4c8a2b] border border-black inline-block"></span>
-                        {item.p1_name}
-                      </span>
-                    </div>
-
-                    {/* Left Player Points Contribution (P1) */}
-                    <div className="col-span-2 text-right pr-4 text-zinc-400 font-mono font-bold">
-                      {item.p1_points}
-                    </div>
-
-                    {/* Symmetrical Middle: Joint Total Points Badge */}
-                    <div className="col-span-2 flex items-center justify-center">
-                      <div className="mc-slot px-3 py-1 rounded min-w-[75px] text-center">
-                        <span className="font-pixel text-[9px] text-[#55ff55] mc-shadow-text-green font-bold block">
-                          {item.duo_combined}
+                    
+                    {/* Desktop Symmetrical Row Structure */}
+                    <div className="hidden sm:grid grid-cols-12 items-center px-6 py-4 text-sm gap-2">
+                      
+                      {/* Rank Indicator Badge */}
+                      <div className="col-span-1 flex items-center justify-center">
+                        <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black ${badge}`}>
+                          {currentRank}
                         </span>
                       </div>
+
+                      {/* Player 1 Username (P1 - Blue side) */}
+                      <div className="col-span-3 text-left flex items-center gap-2 truncate">
+                        <span className={`${p1Name} tracking-wide text-sm truncate`}>
+                          {item.p1_name}
+                        </span>
+                      </div>
+
+                      {/* Player 1 Score */}
+                      <div className={`col-span-2 text-right pr-4 ${p1Pts}`}>
+                        {item.p1_points} pts
+                      </div>
+
+                      {/* Total Score Badge */}
+                      <div className="col-span-2 flex items-center justify-center">
+                        <div className={`px-4 py-1.5 rounded-xl font-bold text-center flex items-center gap-1.5 justify-center min-w-[95px] ${combinedBg}`}>
+                          {decor}
+                          <span className="font-mono text-sm tracking-tight">{item.duo_combined}</span>
+                        </div>
+                      </div>
+
+                      {/* Player 2 Score */}
+                      <div className={`col-span-2 text-left pl-4 ${p2Pts}`}>
+                        {item.p2_points} pts
+                      </div>
+
+                      {/* Player 2 Username (P2 - Red side) */}
+                      <div className="col-span-2 text-right flex items-center justify-end gap-2 truncate">
+                        <span className={`${p2Name} tracking-wide text-sm truncate`}>
+                          {item.p2_name}
+                        </span>
+                      </div>
+
                     </div>
 
-                    {/* Right Player Points Contribution (P2) */}
-                    <div className="col-span-2 text-left pl-4 text-zinc-400 font-mono font-bold">
-                      {item.p2_points}
+                    {/* Responsive Mobile-Only Structure */}
+                    <div className="sm:hidden flex flex-col space-y-3">
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black ${badge}`}>
+                            {currentRank}
+                          </span>
+                          <span className="text-[11px] text-zinc-400 font-extrabold tracking-widest uppercase flex items-center gap-1">
+                            {decor}
+                            {currentRank <= 3 ? "Podium Team" : "Arena Entrant"}
+                          </span>
+                        </div>
+
+                        <div className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono tracking-tight ${combinedBg}`}>
+                          {item.duo_combined} PTS
+                        </div>
+                      </div>
+
+                      {/* Split details */}
+                      <div className="grid grid-cols-2 gap-3 pt-2.5 border-t border-white/5 text-xs">
+                        
+                        {/* P1 Section */}
+                        <div className="flex flex-col space-y-1.5">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="w-1 h-1 rounded-full bg-blue-500"></span>
+                            <span className={`truncate ${p1Name}`}>
+                              {item.p1_name}
+                            </span>
+                          </div>
+                          <span className={`text-[11px] pl-2.5 ${p1Pts}`}>
+                            {item.p1_points} pts
+                          </span>
+                        </div>
+
+                        {/* P2 Section */}
+                        <div className="flex flex-col space-y-1.5 text-right items-end">
+                          <div className="flex items-center gap-1.5 justify-end w-full truncate">
+                            <span className={`truncate ${p2Name}`}>
+                              {item.p2_name}
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-rose-500"></span>
+                          </div>
+                          <span className={`text-[11px] pr-2.5 ${p2Pts}`}>
+                            {item.p2_points} pts
+                          </span>
+                        </div>
+
+                      </div>
+
                     </div>
 
-                    {/* Right Player Username (P2) */}
-                    <div className="col-span-2 text-right">
-                      <span className={`${p2NameStyle} tracking-wide text-xs truncate flex items-center gap-1.5 justify-end`}>
-                        {item.p2_name}
-                        <span className="w-2.5 h-2.5 rounded bg-[#aa0000] border border-black inline-block"></span>
-                      </span>
-                    </div>
-
-                  </div>
+                  </motion.div>
                 );
               })
             )}
-
-          </div>
-        </div>
-
-        {/* Custom Mobile-First Symmetrical Interface: Rendered only on phones */}
-        <div className="block sm:hidden divide-y-2 divide-black select-none">
-          {filteredList.length === 0 ? (
-            <div className="py-12 text-center font-pixel text-[8px] text-zinc-650 mc-shadow-text">
-              NO DUOS DETECTED ON SYSTEM REGISTRATION
-            </div>
-          ) : (
-            paginatedList.map((item, index) => {
-              const currentRank = (currentPage - 1) * pageSize + index + 1;
-              const rankTheme = getRankTheme(currentRank);
-              
-              let p1NameStyle = "text-zinc-200 font-bold font-mono";
-              let p2NameStyle = "text-zinc-200 font-bold font-mono";
-              
-              if (currentRank === 1) {
-                p1NameStyle = "text-[#ffff55] font-black mc-shadow-text";
-                p2NameStyle = "text-[#ffff55] font-black mc-shadow-text";
-              } else if (currentRank === 2) {
-                p1NameStyle = "text-[#55ffff] font-black mc-shadow-text";
-                p2NameStyle = "text-[#55ffff] font-black mc-shadow-text";
-              } else if (currentRank === 3) {
-                p1NameStyle = "text-[#ff5555] font-black mc-shadow-text";
-                p2NameStyle = "text-[#ff5555] font-black mc-shadow-text";
-              }
-
-              return (
-                <div 
-                  key={item.id} 
-                  className="p-4 flex flex-col space-y-3 bg-[#161616] hover:bg-white/5 active:bg-white/5 transition-all text-xs"
-                >
-                  
-                  {/* Row 1: Rank Indicator + Total Combined Duo points in prominent slot */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-7 h-7 border-2 rounded flex items-center justify-center font-pixel text-[8px] ${rankTheme}`}>
-                        {currentRank}
-                      </span>
-                      <span className="font-pixel text-[8px] text-[#ffaa00] tracking-wider uppercase">
-                        {currentRank <= 3 ? "🏆 Podium Duo" : "Team Entry"}
-                      </span>
-                    </div>
-
-                    <div className="mc-slot px-3 py-1 rounded min-w-[80px] text-center">
-                      <span className="font-pixel text-[9px] text-[#55ff55] mc-shadow-text-green font-bold block">
-                        {item.duo_combined} PTS
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Player A vs Player B Symmetrical Display */}
-                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-800 text-[11px]">
-                    
-                    {/* Player A Container */}
-                    <div className="flex flex-col space-y-1 border-r border-[#101010] pr-2">
-                      <span className={`${p1NameStyle} truncate tracking-wide flex items-center gap-1.5`}>
-                        <span className="w-2 h-2 rounded bg-[#4c8a2b] border border-black inline-block shrink-0"></span>
-                        {item.p1_name}
-                      </span>
-                      <span className="text-[10px] font-mono text-zinc-400 font-bold">
-                        {item.p1_points} pts
-                      </span>
-                    </div>
-
-                    {/* Player B Container */}
-                    <div className="flex flex-col space-y-1 pl-2 text-right items-end">
-                      <span className={`${p2NameStyle} truncate tracking-wide flex items-center gap-1.5 justify-end w-full`}>
-                        {item.p2_name}
-                        <span className="w-2 h-2 rounded bg-[#aa0000] border border-black inline-block shrink-0"></span>
-                      </span>
-                      <span className="text-[10px] font-mono text-zinc-400 font-bold">
-                        {item.p2_points} pts
-                      </span>
-                    </div>
-
-                  </div>
-
-                </div>
-              );
-            })
-          )}
+          </AnimatePresence>
         </div>
 
       </div>
 
-      {/* 4. Symmetrical Pagination Footer */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs">
-        <span className="text-zinc-650 uppercase font-bold text-[9px] font-pixel tracking-wide">
-          REGISTRATION ACTIVE • VERIFIED
-        </span>
-
-        <div className="flex items-center gap-2 select-none">
+      {/* 4. Sleek Minimal Pagination Footer */}
+      <div className="flex flex-col sm:flex-row items-center justify-end gap-4 py-2 border-t border-white/5 uppercase select-none">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="mc-button py-2 text-[8px] px-3 font-pixel"
+            className="cursor-pointer px-4 py-2.5 rounded-xl border border-[#1f2537] bg-[#121622]/60 hover:bg-[#121622] text-zinc-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all text-[11px] font-semibold flex items-center gap-1"
           >
-            Prev
+            <ChevronLeft className="w-4 h-4" />
+            <span>Prev</span>
           </button>
           
-          <span className="text-zinc-400 px-3 font-bold font-mono text-[10px] select-none text-center min-w-[110px]">
-            Page {currentPage} of {totalPages}
+          <span className="text-zinc-400 font-semibold font-mono text-xs text-center min-w-[100px]">
+            Page {currentPage} / {totalPages}
           </span>
 
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="mc-button py-2 text-[8px] px-3 font-pixel"
+            className="cursor-pointer px-4 py-2.5 rounded-xl border border-[#1f2537] bg-[#121622]/60 hover:bg-[#121622] text-zinc-400 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-all text-[11px] font-semibold flex items-center gap-1"
           >
-            Next
+            <span>Next</span>
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

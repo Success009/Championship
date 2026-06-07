@@ -114,7 +114,6 @@ function generateRandomGameScores(rankInfluence: number): GameScores {
     [GameKey.Bedwars]: Math.floor(Math.random() * scoreFactor + (scoreFactor > 30 ? 15 : 0)),
     [GameKey.PvP]: Math.floor(Math.random() * (scoreFactor * 0.8) + (scoreFactor > 30 ? 10 : 0)),
     [GameKey.Parkour]: Math.floor(Math.random() * (scoreFactor * 0.7)),
-    [GameKey.Skywars]: Math.floor(Math.random() * (scoreFactor * 0.9)),
     [GameKey.BoatRace]: Math.floor(Math.random() * (scoreFactor * 0.6)),
   };
 }
